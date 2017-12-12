@@ -742,9 +742,9 @@ try
     
     if UFF.binary
         if strcmp(UFF.precision,'single')
-            fwrite(fid,newdata, 'single');
+            fwrite(fid,single(newdata), 'single');
         else
-            fwrite(fid,newdata, 'double');
+            fwrite(fid,double(newdata), 'double');
         end
     else    % ascii
         switch caseID,
