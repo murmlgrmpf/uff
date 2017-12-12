@@ -620,7 +620,11 @@ try
         if ~isfield(UFF,'ordDenomDataChar');  UFF.ordDenomDataChar = 13; end;
     end
     
-    isXEven = (length( unique( diff(UFF.x) ) ) < 2);
+    % The sampling is evenly spaced, if  the relative deviation between
+    % maximum and minimum sampling interval is smaller than 0.001%
+    dxtol = 1e-5;
+    dxMin = min(diff(UFF.x)); dxMax = max(diff(UFF.x));
+    isXEven = (dxMax-dxMin)/dxMin < dxtol;
     isDatacomplex = ~isreal(UFF.measData);
     
     if     ~isDatacomplex && strcmpi(UFF.precision,'single') &&  isXEven; caseID=1;
