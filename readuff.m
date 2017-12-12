@@ -365,8 +365,8 @@ end
 % data; include the first -1 but exclude the last -1;
 % the first -1 will be skipped further later on in get_block_prop
 %--------------
-% ind = strfind(FILE_DATA, '    -1');
-ind = regexpi(FILE_DATA, '(?<=^|[\r\n])(    -1 *)(?:$|[\r\n])');
+ind = strfind(FILE_DATA, '    -1                                                                          ');
+% ind = regexpi(FILE_DATA, '(?<=^|[\r\n])(    -1 *)(?:$|[\r\n])');
 data_len = length(FILE_DATA);
 for ii=length(ind):-1:1
     if ind(ii) == data_len
