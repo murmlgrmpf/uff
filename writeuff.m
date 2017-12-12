@@ -708,9 +708,9 @@ try
 %     fprintf(fid,['%10i%10i%10i' F_13 F_13 F_13 '           \n'],ordDataType,numpt,isXEven,isXEven*UFF.x(1),isXEven*dx,UFF.zAxisValue);
     fprintf(fid,'%10i%10i%10i%13.5e%13.5e%13.5e           \n',ordDataType,numpt,isXEven,isXEven*UFF.x(1),isXEven*dx,UFF.zAxisValue);
     % line 8
-    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.abscDataChar,0,0,0,'NONE',UFF.abscUnitsLabel);
+    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.abscDataChar,0,0,0,UFF.abscAxisLabel,UFF.abscUnitsLabel);
     % line 9
-    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.ordDataChar,UFF.ordLenExp,0,0,'NONE',UFF.ordinateNumUnitsLabel);
+    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.ordDataChar,UFF.ordLenExp,0,0,UFF.ordinateAxisLabel,UFF.ordinateNumUnitsLabel);
     %                                                      ^--acceleration data
     % line 10
     % others: 0=unknown,8=displacement,11=velocity,13=excitation force,15=pressure
