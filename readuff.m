@@ -524,33 +524,37 @@ try
     % start and end for each line of the data set
     blockData = FILE_DATA(so:eo);
     dataLen = length(blockData);
-    lineBreaks = blockData==sprintf('\n') | blockData==sprintf('\r');
-    lineBreaksInd = find(lineBreaks);
-    toInd = zeros(length(lineBreaksInd)+1, 1);
-    fromInd = zeros(length(lineBreaksInd)+1, 1);
+    lineBreaksIndn = strfind(blockData,sprintf('\n'));
+    lineBreaksIndrn = strfind(blockData,sprintf('\r\n'));
+    diffn = setdiff(lineBreaksIndn-1,lineBreaksIndrn);
     
-    toInd(1:length(lineBreaksInd)) = lineBreaksInd-1;
-    if lineBreaksInd(end) < dataLen
-        toInd(length(lineBreaksInd)+1) = dataLen;
+    %% Determine Linefeed character
+    if (length(lineBreaksIndrn)>length(diffn)) % windows linefeeds '\r\n'
+        lengthLF = 2;
+        lineBreaksInd = lineBreaksIndrn;
+    else % unix linefeeds '\n'
+        lengthLF = 1;
+        lineBreaksInd = lineBreaksIndn;
     end
-    toInd = toInd(toInd>0);
-    indToRemove = find(lineBreaks(toInd)==1);
-    toInd(indToRemove) = [];
-
-    if lineBreaksInd(1) > 1
-        fromInd(1) = 1;
-        fromInd(2:length(lineBreaksInd)+1) = lineBreaksInd+1;
+    %% Determine start index of Blocklines
+    if lineBreaksInd(1)>1
+        % Dataset does not start with a newline '\r\n'
+        fromIdx = [1; lineBreaksInd'+lengthLF];
     else
-        fromInd(1:length(lineBreaksInd)) = lineBreaksInd+1;
+        % Dataset does start with a newline '\r\n'
+        fromIdx = lineBreaksInd'+lengthLF;
     end
-    if lineBreaksInd(end) == dataLen
-        fromInd(length(lineBreaksInd)+1) = 0;
+    %% Determine end index of Blocklines
+    if fromIdx(end) < dataLen
+        % Dataset does not end with a newline '\r\n'
+        toIdx = [fromIdx(2:end)-lengthLF-1; dataLen];
+    else
+        % Dataset does end with a newline '\r\n'
+        toIdx = fromIdx(2:end)-lengthLF-1;
+        fromIdx(end) = [];
     end
-    fromInd = fromInd(fromInd>0 & fromInd<=dataLen);
-    indToRemove = find(lineBreaks(fromInd)==1);
-    fromInd(indToRemove) = [];
-
-    blockLines = [fromInd toInd];
+    
+    blockLines = [fromIdx toIdx];
     
     % The data-set line; get the data-set number
     dataSetLine = blockData(blockLines(2,1):blockLines(2,2));
