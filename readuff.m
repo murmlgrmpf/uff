@@ -708,7 +708,7 @@ try
         %-------
         if DataSetProp.byteOrdering == 1; format = 'l'; else format = 'b'; end;
         if (ordDataType==2 || ordDataType==5)
-            prec = 'float32';   % single precision
+            prec = 'single';   % single precision
             numLen = 4;
         else
             prec = 'double';    % double precision
