@@ -770,12 +770,13 @@ try
             if spacingType == 0 % uneven spacing
                 absc_values = fread(fid, numpt, 'float32', numLen*(1+complexOrd*1));                
                 fseek(fid, blockLines(12,1)-1+4+skipbytes, 'bof');
-                values = fread(fid, n_ord_vals_to_read, prec, 4);
                 if complexOrd
-                    values = [absc_values; reshape(values, 2, numpt)];
+                    values = fread(fid, [2,n_ord_vals_to_read/2], ['2*',prec], 4);
+                    values = [absc_values.'; values];
                     values = reshape(values, numpt*3, 1);
                 else
-                    values = [absc_values; reshape(values, 1, numpt)];
+                    values = fread(fid, n_ord_vals_to_read, prec, 4);
+                    values = [absc_values.'; reshape(values, 1, numpt)];
                     values = reshape(values, numpt*2, 1);
                 end
             else
