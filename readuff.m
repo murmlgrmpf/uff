@@ -655,6 +655,11 @@ try
     UFF.xmin = sscanf(tmpLine(31:43), '%g', 1);
     UFF.dx = sscanf(tmpLine(44:56), '%g', 1);
     UFF.zAxisValue = sscanf(tmpLine(57:69), '%g', 1);
+    if (ordDataType == 2)||(ordDataType == 5)
+        UFF.precision = 'single';
+    else
+        UFF.precision = 'double';
+    end
     lineN = lineN + 1;
 
     % Line 8; abscissa data characteristics
