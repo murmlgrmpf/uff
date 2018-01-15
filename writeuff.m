@@ -658,11 +658,11 @@ try
             case 5, % real, double precision, even data
                 nBytes=(8+0+0)*length(UFF.measData);
             case 6, % real, double precision, uneven data
-                nBytes=(8+0+8)*length(UFF.measData);
+                nBytes=(8+0+4)*length(UFF.measData);
             case 7, % complex, double precision, even data
                 nBytes=(8+8+0)*length(UFF.measData);
             case 8, % complex, double precision, uneven data
-                nBytes=(8+8+8)*length(UFF.measData);
+                nBytes=(8+8+4)*length(UFF.measData);
         end
         fprintf(fid,'%6i%1s%6i%6i%12i%12i%6i%6i%12i%12i\n',58,'b',byteOrdering,2,11,nBytes,0,0,0,0);
     else
@@ -748,7 +748,18 @@ try
         if strcmp(UFF.precision,'single')
             fwrite(fid,single(newdata), 'single');
         else
-            fwrite(fid,double(newdata), 'double');
+            if not(isXEven)
+                for i = 1: size(UFF.measData,2)
+                    fwrite(fid,single(UFF.x(i)), 'single');
+                    if isDatacomplex
+                        fwrite(fid,double([real(UFF.measData(i)),imag(UFF.measData(i))]), 'double');
+                    else
+                        fwrite(fid,double(UFF.measData(i)), 'double');
+                    end
+                end
+            else
+                fwrite(fid,double(newdata), 'double');
+            end
         end
     else    % ascii
         switch caseID,
