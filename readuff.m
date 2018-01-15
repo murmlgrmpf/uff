@@ -771,21 +771,17 @@ try
         end
         
         n_ord_vals_to_read = max(numpt, n_ord_vals_to_read)*(1+complexOrd);
+        
         try
+            dimData = (1+complexOrd);
             if spacingType == 0 % uneven spacing
                 absc_values = fread(fid, numpt, 'float32', numLen*(1+complexOrd*1));                
                 fseek(fid, blockLines(12,1)-1+4+skipbytes, 'bof');
-                if complexOrd
-                    values = fread(fid, [2,n_ord_vals_to_read/2], ['2*',prec], 4);
-                    values = [absc_values.'; values];
-                    values = reshape(values, numpt*3, 1);
-                else
-                    values = fread(fid, n_ord_vals_to_read, prec, 4);
-                    values = [absc_values.'; reshape(values, 1, numpt)];
-                    values = reshape(values, numpt*2, 1);
-                end
-            else
-                values = fread(fid, n_ord_vals_to_read, prec);
+            end
+            measData = fread(fid, [dimData,n_ord_vals_to_read/dimData], [num2str(dimData),'*',prec], not(spacingType)*4);
+            if complexOrd
+                measData(1,:) = measData(1,:)+1j*measData(2,:);
+                measData(2,:) = [];
             end
         catch
             errMessage = ['error while reading binary data from ' fileName];
@@ -796,32 +792,27 @@ try
         %------
         % ASCII
         %------
+        complexOrd = (ordDataType == 5 | ordDataType == 6);
+        dimData = (1+complexOrd);
         values = sscanf(DATA(blockLines(12,1):blockLines(end,2)),'%g');
-    end
-
-    % Abscissa and ordinate values
-    if (ordDataType == 2 || ordDataType == 4)        % non-complex ordinate data
-        if spacingType == 0 % uneven abscissa
-            UFF.x = values(1:2:2*numpt-1);
-            UFF.measData = values(2:2:2*numpt);
-        else                % even abscissa
-            UFF.measData = values(1:numpt);
-            nVal = length(UFF.measData);
-            UFF.x = UFF.xmin : UFF.dx : UFF.xmin + (nVal-1)*UFF.dx;
+        % Split time/frequency vector from data values
+        if spacingType == 0 % uneven spacing
+            absc_values = values(1:(dimData+1):end); % TODO: Check
+            values(1:(dimData+1):end) = [];
         end
-    elseif (ordDataType == 5 || ordDataType == 6)    % complex ordinate data
-        if spacingType == 0 % uneven abscissa
-            UFF.measData = values(2:3:3*numpt-1) + j*values(3:3:3*numpt);
-            UFF.x = values(1:3:3*numpt-2);
-        else                % even abscissa
-            UFF.measData = values(1:2:2*numpt-1) + j*values(2:2:2*numpt);
-            nVal = length(UFF.measData);
-            UFF.x = UFF.xmin : UFF.dx : UFF.xmin + (nVal-1)*UFF.dx;
+        
+        measData = reshape(values,dimData,length(values)/dimData);
+        if complexOrd
+            measData(1,:) = measData(1,:)+1j*measData(2,:);
+            measData(2,:) = [];
         end
-    else
-        errMessage = ['error reading measurement data at:' num2str(lineN)];
-        return
     end
+    if not(spacingType == 0) % if even spacing create abscissa values
+        nVal = length(measData);
+        absc_values = UFF.xmin : UFF.dx : UFF.xmin + (nVal-1)*UFF.dx;
+    end
+    UFF.x = absc_values;
+    UFF.measData = measData;
 
 catch
     errMessage = ['error reading measurement data: ' lasterr];
