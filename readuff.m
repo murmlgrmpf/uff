@@ -655,6 +655,7 @@ try
     UFF.xmin = sscanf(tmpLine(31:43), '%g', 1);
     UFF.dx = sscanf(tmpLine(44:56), '%g', 1);
     UFF.zAxisValue = sscanf(tmpLine(57:69), '%g', 1);
+    complexOrd = (ordDataType == 5 | ordDataType == 6);
     if (ordDataType == 2)||(ordDataType == 5)
         UFF.precision = 'single';
     else
@@ -733,7 +734,6 @@ try
         % According to the UFF documentation, in the case of uneven
         % abscissa, the abscissa is always stored as real, single
         % precision.
-        complexOrd = (ordDataType == 5 | ordDataType == 6);
         if spacingType == 0  % uneven
             n_ord_vals_to_read = (DataSetProp.nBytes - numpt*4)/numLen;
         else                 % even
