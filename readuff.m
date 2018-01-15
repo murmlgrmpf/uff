@@ -792,7 +792,6 @@ try
         %------
         % ASCII
         %------
-        complexOrd = (ordDataType == 5 | ordDataType == 6);
         dimData = (1+complexOrd);
         values = sscanf(DATA(blockLines(12,1):blockLines(end,2)),'%g');
         % Split time/frequency vector from data values
