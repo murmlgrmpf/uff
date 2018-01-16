@@ -210,9 +210,6 @@ function Info = writeuff(fileName, UffDataSets, action)
 %
 %   Bug reports, questions, contributions, etc. can be sent to the e-mail given above.
 %   
-%   Known bug - double precision binary abscissa write is in double precision
-%               but must be in single precision
-%              (only affects uneven data and readuff has the corresponding issue)
 %--------------------------------------------------------------------------
 
 %----------------
