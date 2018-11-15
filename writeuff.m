@@ -270,7 +270,7 @@ function Info = writeuff(fileName, UffDataSets, action)
 %--------------
 % Check input arguments
 %--------------
-error(nargchk(2,3,nargin));
+narginchk(2,3);
 if nargin < 3 || isempty(action)
     action = 'add';
 end
@@ -283,11 +283,11 @@ end
 %--------------
 machineFormat='n';      % native sets to default for the OS
 if strcmpi(action,'replace')
-    [fid,ermesage] = fopen(fileName,'w',machineFormat);
+    [fid,~] = fopen(fileName,'w',machineFormat);
 else
-    [fid,ermesage] = fopen(fileName,'a',machineFormat);
+    [fid,~] = fopen(fileName,'a',machineFormat);
 end
-if fid == -1,
+if fid == -1
     error(['could not open file: ' fileName]);
 end
 
@@ -333,7 +333,7 @@ for ii=1:nDataSets
                 Info.errmsg{ii} = ['Unsupported data set: ' num2str(UffDataSets{ii}.dsType)];
         end
         %
-    catch
+    catch lasterr
         fclose(fid);
         error(['Error writing uff file: ' fileName ': ' lasterr]);
     end
@@ -346,7 +346,7 @@ for ii=1:nDataSets
     end
 end
 Info.nErrors = length(find(Info.errcode));
-Info.errorMsgs = Info.errmsg(find(Info.errcode));
+Info.errorMsgs = Info.errmsg(find(Info.errcode)); %#ok<FNDSB>
 
 
 
@@ -370,15 +370,15 @@ else
 end
 try
     n = length(UFF.nodeN);
-    if ~isfield(UFF,'defCS');   UFF.defCS = zeros(n,1);  end;
-    if ~isfield(UFF,'dispCS');  UFF.dispCS = zeros(n,1); end;
-    if ~isfield(UFF,'color');   UFF.color = zeros(n,1);  end;
+    if ~isfield(UFF,'defCS');   UFF.defCS = zeros(n,1);  end
+    if ~isfield(UFF,'dispCS');  UFF.dispCS = zeros(n,1); end
+    if ~isfield(UFF,'color');   UFF.color = zeros(n,1);  end
     fprintf(fid,'%6i%74s\n',15,' ');
     for ii=1:n
         fprintf(fid,['%10i%10i%10i%10i' F_13 F_13 F_13 '\n'],UFF.nodeN(ii),UFF.defCS(ii),UFF.dispCS(ii),UFF.color(ii), ...
             UFF.x(ii),UFF.y(ii),UFF.z(ii));
     end
-catch
+catch lasterr
     errMessage = ['error writing coordinate data: ' lasterr];
 end
 %-----------------------------------------------------------------
@@ -394,21 +394,21 @@ else
 end
 try
     n = length(UFF.csNum);
-    if ~isfield(UFF,'csType');   UFF.csType = zeros(n,1);  end;
-    if ~isfield(UFF,'refCsNum');  UFF.refCsNum = zeros(n,1); end;
-    if ~isfield(UFF,'color');   UFF.color = zeros(n,1);  end;
-    if ~isfield(UFF,'method');   UFF.method = ones(n,1);  end;
-    if ~isfield(UFF,'csName');   UFF.csName = cellstr(strcat('CS',num2str(linspace(1,n,n).'))).';  end;
+    if ~isfield(UFF,'csType');   UFF.csType = zeros(n,1);  end
+    if ~isfield(UFF,'refCsNum');  UFF.refCsNum = zeros(n,1); end
+    if ~isfield(UFF,'color');   UFF.color = zeros(n,1);  end
+    if ~isfield(UFF,'method');   UFF.method = ones(n,1);  end
+    if ~isfield(UFF,'csName');   UFF.csName = cellstr(strcat('CS',num2str(linspace(1,n,n).'))).';  end
     fprintf(fid,'%6i%74s\n',18,' ');
     for ii=1:n
-        fprintf(fid,['%10i%10i%10i%10i%10i\n'],UFF.csNum(ii),UFF.csType(ii),UFF.refCsNum(ii),UFF.color(ii), ...
+        fprintf(fid,'%10i%10i%10i%10i%10i\n',UFF.csNum(ii),UFF.csType(ii),UFF.refCsNum(ii),UFF.color(ii), ...
             UFF.method(ii));
         fprintf(fid,'%-20s\n',UFF.csName{ii});
         fprintf(fid,[ F_13 F_13 F_13 F_13 F_13 F_13 '\n'],UFF.csX(ii),UFF.csY(ii),UFF.csZ(ii),UFF.ref1X(ii), ...
             UFF.ref1Y(ii),UFF.ref1Z(ii));
         fprintf(fid,[ F_13 F_13 F_13 '\n'],UFF.ref2X(ii),UFF.ref2Y(ii),UFF.ref2Z(ii));
     end
-catch
+catch lasterr
     errMessage = ['error writing coordinate data: ' lasterr];
 end
 %-----------------------------------------------------------------
@@ -418,16 +418,16 @@ function errMessage = write82(fid,UFF)
 % #82 - Write data-set type 82 data
 errMessage = [];
 try
-    if ~isfield(UFF,'ID');      UFF.ID = 'NONE'; end;
-    if ~isfield(UFF,'color');   UFF.color = 0;  end;
+    if ~isfield(UFF,'ID');      UFF.ID = 'NONE'; end
+    if ~isfield(UFF,'color');   UFF.color = 0;  end
     fprintf(fid,'%6i%74s\n',82,' ');
     fprintf(fid,'%10i%10i%10i\n',UFF.traceNum,length(UFF.lines),UFF.color);  % line 1
     fprintf(fid,'%-80s\n',UFF.ID); % line 2
     fprintf(fid,'%10i%10i%10i%10i%10i%10i%10i%10i\n',UFF.lines); % line 3
-    if rem(length(UFF.lines),8)~=0,
+    if rem(length(UFF.lines),8)~=0
         fprintf(fid,'\n');
     end
-catch
+catch lasterr
     errMessage = ['error writing display-sequence data: ' lasterr];
 end
 %-----------------------------------------------------------------
@@ -443,7 +443,7 @@ else
 end
 errMessage = [];
 try
-    if isfield(UFF,'r4') & isfield(UFF,'r5') & isfield(UFF,'r6')
+    if isfield(UFF,'r4') && isfield(UFF,'r5') && isfield(UFF,'r6')
         num_data_per_pt = 6;
     else
         num_data_per_pt = 3;
@@ -457,14 +457,14 @@ try
     fprintf(fid,'%-80s\n','NONE'); %line 5
     fprintf(fid,'%10i%10i%10i%10i%10i%10i\n',1,UFF.analysisType,UFF.dataCharacter, ...
         UFF.responseType,UFF.dataType,num_data_per_pt); %line 6
-    if UFF.analysisType == 2,                               % Normal modes
+    if UFF.analysisType == 2                               % Normal modes
         fprintf(fid,'%10i%10i%10i%10i\n',2,4,0,UFF.modeNum); %line 7
         fprintf(fid,[F_13 F_13 F_13 F_13 '\n'], ...
             UFF.modeFreq,UFF.modeMass,UFF.mode_v_damping,UFF.mode_h_damping); %line 8
-    elseif UFF.analysisType == 5,                           % Frequency Response
+    elseif UFF.analysisType == 5                           % Frequency Response
         fprintf(fid,'%10i%10i%10i%10i\n',2,1,0,UFF.freqNum); %line 7
         fprintf(fid,'%13.4e\n', UFF.freq); %line 8
-    elseif UFF.analysisType == 3 | UFF.analysisType == 7,   % Complex modes
+    elseif UFF.analysisType == 3 || UFF.analysisType == 7   % Complex modes
         fprintf(fid,'%10i%10i%10i%10i\n',2,6,0,UFF.modeNum); %line 7
         fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'], ...
             real(UFF.eigVal),imag(UFF.eigVal),real(UFF.modalA),imag(UFF.modalA), ...
@@ -473,15 +473,15 @@ try
         errMessage = ['Unsupported analysis type: ' num2str(UFF.analysisType)];
         return
     end
-    if UFF.dataType == 2,  % real data
-        if num_data_per_pt == 3,
-            for k = 1:length(UFF.nodeNum);
+    if UFF.dataType == 2  % real data
+        if num_data_per_pt == 3
+            for k = 1:length(UFF.nodeNum)
                 fprintf(fid,'%10i\n',UFF.nodeNum(k));
                 fprintf(fid,[F_13 F_13 F_13 '\n'],...
                     real(UFF.r1(k)), real(UFF.r2(k)), real(UFF.r3(k)));
             end
         else    % num_data_per_pt = 6
-            for k = 1:length(UFF.nodeNum);
+            for k = 1:length(UFF.nodeNum)
                 fprintf(fid,'%10i\n',UFF.nodeNum(k));
                 fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'], ...
                     real(UFF.r1(k)), real(UFF.r2(k)), real(UFF.r3(k)),...
@@ -489,7 +489,7 @@ try
             end
         end
     elseif UFF.dataType == 5  %complex data
-        for k = 1:length(UFF.nodeNum);
+        for k = 1:length(UFF.nodeNum)
             fprintf(fid,'%10i\n',UFF.nodeNum(k));
             fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'], ...
                 real(UFF.r1(k)),imag(UFF.r1(k)), real(UFF.r2(k)),imag(UFF.r2(k)), ...
@@ -500,7 +500,7 @@ try
         return
     end
     
-catch
+catch lasterr
     errMessage = ['error writing modal data: ' lasterr];
 end
 %-----------------------------------------------------------------
@@ -519,18 +519,18 @@ else
 end
 errMessage = [];
 try
-    if ~isfield(UFF,'windowType');  UFF.windowType = 0; end;
-    if ~isfield(UFF,'AmpUnits');  UFF.AmpUnits = 0; end;
-    if ~isfield(UFF,'NorMethod');  UFF.NorMethod = 0; end;
-    if ~isfield(UFF,'ordNumDataTypeQual');  UFF.ordNumDataTypeQual = 0; end;
-    if ~isfield(UFF,'ordDenomDataTypeQual');  UFF.ordDenomDataTypeQual = 0; end;
-    if ~isfield(UFF,'zDataTypeQual');  UFF.zDataTypeQual = 0; end;
-    if ~isfield(UFF,'samplingType');  UFF.samplingType = 0; end;
-    if ~isfield(UFF,'zRPM');  UFF.zRPM = 0; end;
-    if ~isfield(UFF,'zTime');  UFF.zTime = 0; end;
-    if ~isfield(UFF,'zOrder');  UFF.zOrder = 0; end;
-    if ~isfield(UFF,'NumSamples');  UFF.NumSamples = 0; end;
-    if ~isfield(UFF,'expWindowDamping');  UFF.expWindowDamping = 0; end;
+    if ~isfield(UFF,'windowType');  UFF.windowType = 0; end
+    if ~isfield(UFF,'AmpUnits');  UFF.AmpUnits = 0; end
+    if ~isfield(UFF,'NorMethod');  UFF.NorMethod = 0; end
+    if ~isfield(UFF,'ordNumDataTypeQual');  UFF.ordNumDataTypeQual = 0; end
+    if ~isfield(UFF,'ordDenomDataTypeQual');  UFF.ordDenomDataTypeQual = 0; end
+    if ~isfield(UFF,'zDataTypeQual');  UFF.zDataTypeQual = 0; end
+    if ~isfield(UFF,'samplingType');  UFF.samplingType = 0; end
+    if ~isfield(UFF,'zRPM');  UFF.zRPM = 0; end
+    if ~isfield(UFF,'zTime');  UFF.zTime = 0; end
+    if ~isfield(UFF,'zOrder');  UFF.zOrder = 0; end
+    if ~isfield(UFF,'NumSamples');  UFF.NumSamples = 0; end
+    if ~isfield(UFF,'expWindowDamping');  UFF.expWindowDamping = 0; end
     fprintf(fid,'%6i%74s\n',1858,' ');
     % Line 1
     fprintf(fid,'%12i%12i%12i%12i%12i%12i        \n',0,0,0,0,0,0);
@@ -546,7 +546,7 @@ try
     fprintf(fid,'%-6s%-74s\n','NONE','NONE');
     % Line 7
     fprintf(fid,'%-80s\n','NONE');
-catch
+catch lasterr
     errMessage = ['error writing modal data: ' lasterr];
 end
 %--------------------------------------------------------------------------
@@ -586,35 +586,35 @@ try
         errMessage = ['Unsupported function type: ' num2str(UFF.functionType)];
         return
     end
-    if ~isfield(UFF,'precision'); UFF.precision='double'; end;
-    if ~isfield(UFF,'ID_4');  UFF.ID_4 = 'NONE'; end;
-    if ~isfield(UFF,'ID_5');  UFF.ID_5 = 'NONE'; end;
-    if ~isfield(UFF,'loadCaseId');  UFF.loadCaseId = 0; end;
-    if ~isfield(UFF,'abscLengthUnitsExponent');  UFF.abscLengthUnitsExponent = 0; end;
-    if ~isfield(UFF,'abscForceUnitsExponent');  UFF.abscForceUnitsExponent = 0; end;
-    if ~isfield(UFF,'abscTempUnitsExponent');  UFF.abscTempUnitsExponent = 0; end;
-    if ~isfield(UFF,'abscAxisLabel');  UFF.abscAxisLabel = 'NONE'; end;
-    if ~isfield(UFF,'abscUnitsLabel');  UFF.abscUnitsLabel= 'NONE'; end;
-    if ~isfield(UFF,'ordinateLengthUnitsExponent');  UFF.ordinateLengthUnitsExponent = 0; end;
-    if ~isfield(UFF,'ordinateForceUnitsExponent');  UFF.ordinateForceUnitsExponent = 0; end;
-    if ~isfield(UFF,'ordinateTempUnitsExponent');  UFF.ordinateTempUnitsExponent = 0; end;
-    if ~isfield(UFF,'ordinateAxisLabel');  UFF.ordinateAxisLabel = 'NONE'; end;
-    if ~isfield(UFF,'rspEntName');  UFF.rspEntName = 'NONE'; end;
-    if ~isfield(UFF,'refEntName');  UFF.refEntName = 'NONE'; end;
-    if ~isfield(UFF,'ordinateNumUnitsLabel');  UFF.ordinateNumUnitsLabel= 'NONE'; end;
-    if ~isfield(UFF,'ordLenExp');  UFF.ordLenExp = 0; end;
-    if ~isfield(UFF,'ordinateDenomUnitsLabel');  UFF.ordinateDenomUnitsLabel= 'NONE'; end;
-    if ~isfield(UFF,'ordDenomLenExp');  UFF.ordDenomLenExp = 0; end;
-    if ~isfield(UFF,'zUnitsLabel');  UFF.zUnitsLabel= 'NONE'; end;
-    if ~isfield(UFF,'zAxisValue');  UFF.zAxisValue= 0; end;
+    if ~isfield(UFF,'precision'); UFF.precision='double'; end
+    if ~isfield(UFF,'ID_4');  UFF.ID_4 = 'NONE'; end
+    if ~isfield(UFF,'ID_5');  UFF.ID_5 = 'NONE'; end
+    if ~isfield(UFF,'loadCaseId');  UFF.loadCaseId = 0; end
+    if ~isfield(UFF,'abscLengthUnitsExponent');  UFF.abscLengthUnitsExponent = 0; end
+    if ~isfield(UFF,'abscForceUnitsExponent');  UFF.abscForceUnitsExponent = 0; end
+    if ~isfield(UFF,'abscTempUnitsExponent');  UFF.abscTempUnitsExponent = 0; end
+    if ~isfield(UFF,'abscAxisLabel');  UFF.abscAxisLabel = 'NONE'; end
+    if ~isfield(UFF,'abscUnitsLabel');  UFF.abscUnitsLabel= 'NONE'; end
+    if ~isfield(UFF,'ordinateLengthUnitsExponent');  UFF.ordinateLengthUnitsExponent = 0; end
+    if ~isfield(UFF,'ordinateForceUnitsExponent');  UFF.ordinateForceUnitsExponent = 0; end
+    if ~isfield(UFF,'ordinateTempUnitsExponent');  UFF.ordinateTempUnitsExponent = 0; end
+    if ~isfield(UFF,'ordinateAxisLabel');  UFF.ordinateAxisLabel = 'NONE'; end
+    if ~isfield(UFF,'rspEntName');  UFF.rspEntName = 'NONE'; end
+    if ~isfield(UFF,'refEntName');  UFF.refEntName = 'NONE'; end
+    if ~isfield(UFF,'ordinateNumUnitsLabel');  UFF.ordinateNumUnitsLabel= 'NONE'; end
+    if ~isfield(UFF,'ordLenExp');  UFF.ordLenExp = 0; end
+    if ~isfield(UFF,'ordinateDenomUnitsLabel');  UFF.ordinateDenomUnitsLabel= 'NONE'; end
+    if ~isfield(UFF,'ordDenomLenExp');  UFF.ordDenomLenExp = 0; end
+    if ~isfield(UFF,'zUnitsLabel');  UFF.zUnitsLabel= 'NONE'; end
+    if ~isfield(UFF,'zAxisValue');  UFF.zAxisValue= 0; end
     if UFF.functionType == 1    % time response
-        if ~isfield(UFF,'abscDataChar');  UFF.abscDataChar = 17; end;
-        if ~isfield(UFF,'ordDataChar');  UFF.ordDataChar = 8; end;
-        if ~isfield(UFF,'ordDenomDataChar');  UFF.ordDenomDataChar = 0; end;
+        if ~isfield(UFF,'abscDataChar');  UFF.abscDataChar = 17; end
+        if ~isfield(UFF,'ordDataChar');  UFF.ordDataChar = 8; end
+        if ~isfield(UFF,'ordDenomDataChar');  UFF.ordDenomDataChar = 0; end
     else                        % frequency response
-        if ~isfield(UFF,'abscDataChar');  UFF.abscDataChar = 18; end;
-        if ~isfield(UFF,'ordDataChar');  UFF.ordDataChar = 12; end;
-        if ~isfield(UFF,'ordDenomDataChar');  UFF.ordDenomDataChar = 13; end;
+        if ~isfield(UFF,'abscDataChar');  UFF.abscDataChar = 18; end
+        if ~isfield(UFF,'ordDataChar');  UFF.ordDataChar = 12; end
+        if ~isfield(UFF,'ordDenomDataChar');  UFF.ordDenomDataChar = 13; end
     end
     
     % The sampling is evenly spaced, if  the relative deviation between
@@ -632,33 +632,33 @@ try
     elseif ~isDatacomplex && strcmpi(UFF.precision,'double') && ~isXEven; caseID=6;
     elseif  isDatacomplex && strcmpi(UFF.precision,'double') &&  isXEven; caseID=7;
     elseif  isDatacomplex && strcmpi(UFF.precision,'double') && ~isXEven; caseID=8;
-    else errMessage = 'Cannot determine data writing case for data set 58'; return
+    else; errMessage = 'Cannot determine data writing case for data set 58'; return
     end
     
     if UFF.binary
-        [filename, mode, machineformat] = fopen(fid);
+        [~, ~, machineformat] = fopen(fid);
         if strcmpi(machineformat(1:7),'ieee-le')
             byteOrdering = 1;
         else
             byteOrdering = 2;
         end
         % number of bytes
-        switch caseID,
-            case 1, % real, single precision, even data
+        switch caseID
+            case 1 % real, single precision, even data
                 nBytes=(4+0+0)*length(UFF.measData);
-            case 2, % real, single precision, uneven data
+            case 2 % real, single precision, uneven data
                 nBytes=(4+0+4)*length(UFF.measData);
-            case 3, % complex, single precision, even data
+            case 3 % complex, single precision, even data
                 nBytes=(4+4+0)*length(UFF.measData);
-            case 4, % complex, single precision, uneven data
+            case 4 % complex, single precision, uneven data
                 nBytes=(4+4+4)*length(UFF.measData);
-            case 5, % real, double precision, even data
+            case 5 % real, double precision, even data
                 nBytes=(8+0+0)*length(UFF.measData);
-            case 6, % real, double precision, uneven data
+            case 6 % real, double precision, uneven data
                 nBytes=(8+0+4)*length(UFF.measData);
-            case 7, % complex, double precision, even data
+            case 7 % complex, double precision, even data
                 nBytes=(8+8+0)*length(UFF.measData);
-            case 8, % complex, double precision, uneven data
+            case 8 % complex, double precision, uneven data
                 nBytes=(8+8+4)*length(UFF.measData);
         end
         fprintf(fid,'%6i%1s%6i%6i%12i%12i%6i%6i%12i%12i\n',58,'b',byteOrdering,2,11,nBytes,0,0,0,0);
@@ -677,14 +677,14 @@ try
     numpt = length(UFF.measData);
     % line 7
     dx = UFF.x(2) - UFF.x(1);
-    switch caseID,
-        case {1, 2},    % real single precision
+    switch caseID
+        case {1, 2}    % real single precision
             ordDataType=2;
-        case {5, 6},    % real, double precision
+        case {5, 6}    % real, double precision
             ordDataType=4;
-        case {3, 4},    % complex, single precision
+        case {3, 4}    % complex, single precision
             ordDataType=5;
-        case {7, 8},    % complex, double precision
+        case {7, 8}    % complex, double precision
             ordDataType=6;
     end
 %     fprintf(fid,['%10i%10i%10i' F_13 F_13 F_13 '           \n'],ordDataType,numpt,isXEven,isXEven*UFF.x(1),isXEven*dx,UFF.zAxisValue);
@@ -704,7 +704,7 @@ try
     %
     % line 12: % data values
     nOrdValues = length(UFF.measData);
-    switch caseID,
+    switch caseID
         case {1, 5}     % real even data
             newdata = UFF.measData;
         case {2, 6}     % real uneven data
@@ -740,51 +740,51 @@ try
             end
         end
     else    % ascii
-        switch caseID,
-            case 1, % real, single precision, even data
+        switch caseID
+            case 1 % real, single precision, even data
                 fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'],newdata);
-                if rem(length(newdata),6)~=0,
+                if rem(length(newdata),6)~=0
                     fprintf(fid,'\n');
                 end
-            case 2, % real, single precision, uneven data
+            case 2 % real, single precision, uneven data
                 fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'],newdata);
-                if rem(length(newdata),6)~=0,
+                if rem(length(newdata),6)~=0
                     fprintf(fid,'\n');
                 end
-            case 3, % complex, single precision, even data
+            case 3 % complex, single precision, even data
                 fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'],newdata);
-                if rem(length(newdata),6)~=0,
+                if rem(length(newdata),6)~=0
                     fprintf(fid,'\n');
                 end
-            case 4, % complex, single precision, uneven data
+            case 4 % complex, single precision, uneven data
                 fprintf(fid,[F_13 F_13 F_13 F_13 F_13 F_13 '\n'],newdata);
-                if rem(length(newdata),6)~=0,
+                if rem(length(newdata),6)~=0
                     fprintf(fid,'\n');
                 end
-            case 5, % real, double precision, even data
+            case 5 % real, double precision, even data
                 fprintf(fid,[F_20 F_20 F_20 F_20 '\n'],newdata);
-                if rem(length(newdata),4)~=0,
+                if rem(length(newdata),4)~=0
                     fprintf(fid,'\n');
                 end
-            case 6, % real, double precision, uneven data
+            case 6 % real, double precision, uneven data
                 fprintf(fid,[F_13 F_20 F_13 F_20 '\n'],newdata);
-                if rem(length(newdata),4)~=0,
+                if rem(length(newdata),4)~=0
                     fprintf(fid,'\n');
                 end
-            case 7, % complex, double precision, even data
+            case 7 % complex, double precision, even data
                 fprintf(fid,[F_20 F_20 F_20 F_20 '\n'],newdata);
-                if rem(length(newdata),4)~=0,
+                if rem(length(newdata),4)~=0
                     fprintf(fid,'\n');
                 end
-            case 8, % complex, double precision, uneven data
+            case 8 % complex, double precision, uneven data
                 fprintf(fid,[F_13 F_20 F_20 '\n'],newdata);
-                if rem(length(newdata),3)~=0,
+                if rem(length(newdata),3)~=0
                     fprintf(fid,'\n');
                 end
         end
     end
     
-catch
+catch lasterr
     errMessage = ['error writing measurement data: ' lasterr];
 end
 %--------------------------------------------------------------------------
@@ -798,10 +798,10 @@ try
     d(end-3:end-2) = [];
     if ~isfield(UFF,'dateCreated'); UFF.dateCreated=d; end
     if ~isfield(UFF,'timeCreated'); UFF.timeCreated=datestr(now,13); end
-    if ~isfield(UFF,'dbVersion'); UFF.dbVersion = 0; end;
-    if ischar(UFF.dbVersion); UFF.dbVersion = str2num(UFF.dbVersion); end;
-    if ~isfield(UFF,'dbLastSaveDate'); UFF.dbLastSaveDate=d; end;
-    if ~isfield(UFF,'dbLastSaveTime'); UFF.dbLastSaveTime=datestr(now,13); end;
+    if ~isfield(UFF,'dbVersion'); UFF.dbVersion = 0; end
+    if ischar(UFF.dbVersion); UFF.dbVersion = str2double(UFF.dbVersion); end
+    if ~isfield(UFF,'dbLastSaveDate'); UFF.dbLastSaveDate=d; end
+    if ~isfield(UFF,'dbLastSaveTime'); UFF.dbLastSaveTime=datestr(now,13); end
     
     fprintf(fid,'%6i%74s\n',151,' ');
     fprintf(fid,'%-80s\n',UFF.modelName); % line 1
@@ -812,7 +812,7 @@ try
     fprintf(fid,'%-10s%-10s%60s\n',UFF.dbLastSaveDate,UFF.dbLastSaveTime,' '); % line 5
     fprintf(fid,'%-80s\n',UFF.uffApp); % line 6
     fprintf(fid,'%-10s%-10s%60s\n',d,datestr(now,13),' '); % line 7
-catch
+catch lasterr
     errMessage = ['error writing header data: ' lasterr];
 end
 %--------------------------------------------------------------------------
@@ -823,11 +823,11 @@ function errMessage = write164(fid,UFF)
 % #164 - Write data-set type 164 data
 errMessage = [];
 try
-    if ~isfield(UFF,'unitsDescription'); UFF.unitsDescription = ' '; end;
+    if ~isfield(UFF,'unitsDescription'); UFF.unitsDescription = ' '; end
     fprintf(fid,'%6i%74s\n',164,' ');
-    if ischar(UFF.tempMode); UFF.tempMode = str2num(UFF.tempMode); end;
-    if isempty(UFF.tempMode); UFF.tempMode = 1; end;
-    if length(UFF.unitsDescription)>20; UFF.unitsDescription=UFF.unitsDescription(1:20); end;
+    if ischar(UFF.tempMode); UFF.tempMode = str2double(UFF.tempMode); end
+    if isempty(UFF.tempMode); UFF.tempMode = 1; end
+    if length(UFF.unitsDescription)>20; UFF.unitsDescription=UFF.unitsDescription(1:20); end
     fprintf(fid,'%10i%-20s%10i\n',UFF.unitsCode,UFF.unitsDescription,UFF.tempMode); % line 1
     %
     str = lower(sprintf('%25.17e%25.17e%25.17e',UFF.facLength,UFF.facForce,UFF.facTemp)); % line 2
@@ -838,7 +838,7 @@ try
     str = strrep(str,'e+','D+');
     str = strrep(str,'e-','D-');
     fprintf(fid,'%s\n',str);
-catch
+catch lasterr
     errMessage = ['error writing units data: ' lasterr];
 end
 %--------------------------------------------------------------------------
@@ -853,18 +853,18 @@ else
     F_15 = '%15.7e';
 end
 try
-    if ~ischar(UFF.serNum); UFF.serNum = num2str(UFF.serNum); end;
-    if ~isfield(UFF,'manufacturer'); UFF.manufacturer = 'NONE'; end;
-    if ~isfield(UFF,'model'); UFF.model = 'NONE'; end;
-    if ~isfield(UFF,'calibrationBy'); UFF.calibrationBy = 'NONE'; end;
-    if ~isfield(UFF,'calibrationDate'); UFF.calibrationDate = 'NONE'; end;
-    if ~isfield(UFF,'calibrationDueDate'); UFF.calibrationDueDate = 'NONE'; end;
-    if ~isfield(UFF,'transducerDescrip'); UFF.transducerDescrip = 'NONE'; end;
-    if ~isfield(UFF,'typeQualifier'); UFF.typeQualifier = 0; end;
-    if ~isfield(UFF,'lengthUnitsExp'); UFF.lengthUnitsExp = 0; end;
-    if ~isfield(UFF,'forceUnitsExp'); UFF.forceUnitsExp = 0; end;
-    if ~isfield(UFF,'temperatureUnitsExp'); UFF.temperatureUnitsExp = 0; end;
-    if ~isfield(UFF,'unitsLabel'); UFF.unitsLabel = 'NONE'; end;
+    if ~ischar(UFF.serNum); UFF.serNum = num2str(UFF.serNum); end
+    if ~isfield(UFF,'manufacturer'); UFF.manufacturer = 'NONE'; end
+    if ~isfield(UFF,'model'); UFF.model = 'NONE'; end
+    if ~isfield(UFF,'calibrationBy'); UFF.calibrationBy = 'NONE'; end
+    if ~isfield(UFF,'calibrationDate'); UFF.calibrationDate = 'NONE'; end
+    if ~isfield(UFF,'calibrationDueDate'); UFF.calibrationDueDate = 'NONE'; end
+    if ~isfield(UFF,'transducerDescrip'); UFF.transducerDescrip = 'NONE'; end
+    if ~isfield(UFF,'typeQualifier'); UFF.typeQualifier = 0; end
+    if ~isfield(UFF,'lengthUnitsExp'); UFF.lengthUnitsExp = 0; end
+    if ~isfield(UFF,'forceUnitsExp'); UFF.forceUnitsExp = 0; end
+    if ~isfield(UFF,'temperatureUnitsExp'); UFF.temperatureUnitsExp = 0; end
+    if ~isfield(UFF,'unitsLabel'); UFF.unitsLabel = 'NONE'; end
     fprintf(fid,'%6i%74s\n',1860,' ');
     fprintf(fid,'%-20s\n',UFF.serNum); % line 1
     fprintf(fid,'%-20s  %-20s\n',UFF.manufacturer,UFF.model); % line 2
@@ -878,7 +878,7 @@ try
         UFF.lengthUnitsExp,UFF.forceUnitsExp,UFF.temperatureUnitsExp,...
         UFF.unitsLabel);                                             % line 5
     fprintf(fid,[F_15 '\n'],UFF.sensitivity); % line 6
-catch
+catch lasterr
 errMessage = ['error writing trasducer data: ' lasterr];
 end
 
@@ -894,7 +894,7 @@ else
 end
 try
     n = length(UFF.csLabels);
-    if ~isfield(UFF,'csNames'); UFF.csNames = cell(n,1); UFF.csNames(1:n) = {' '}; end;
+    if ~isfield(UFF,'csNames'); UFF.csNames = cell(n,1); UFF.csNames(1:n) = {' '}; end
     fprintf(fid,'%6i%74s\n',2420,' ');
     fprintf(fid,'%10i%10i\n',UFF.partUID,0);       % line 1
     fprintf(fid,'%-40s\n',UFF.partName);            % line 2
@@ -908,7 +908,7 @@ try
         fprintf(fid,[F_25 F_25 F_25 '\n'],UFF.csTrMatrices{ii}(4,1:3)); % line 8
     end
     
-catch
+catch lasterr
     errMessage = ['error writing coordinate system data: ' lasterr];
 end
 %--------------------------------------------------------------------------
