@@ -691,7 +691,7 @@ try
         fprintf(fid,'%-80s\n',UFF.ID_5(1:80));   %  line 5
     end
     %
-    fprintf(fid,'%5i%10i%5i%10i %-10s%10i%4i %-10s%10i%4i\n',UFF.functionType,0,0,UFF.loadCaseId,UFF.rspEntName,...
+    fprintf(fid,'%5i%10i%5i%10i %-10.10s%10i%4i %-10.10s%10i%4i\n',UFF.functionType,0,0,UFF.loadCaseId,UFF.rspEntName,...
         UFF.rspNode,UFF.rspDir,UFF.refEntName,UFF.refNode,UFF.refDir);    % line 6
     numpt = length(UFF.measData);
     % line 7
@@ -709,17 +709,17 @@ try
 %     fprintf(fid,['%10i%10i%10i' F_13 F_13 F_13 '           \n'],ordDataType,numpt,isXEven,isXEven*UFF.x(1),isXEven*dx,UFF.zAxisValue);
     fprintf(fid,'%10i%10i%10i%13.5e%13.5e%13.5e           \n',ordDataType,numpt,isXEven,isXEven*UFF.x(1),isXEven*dx,UFF.zAxisValue);
     % line 8
-    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.abscDataChar,0,0,0,UFF.abscAxisLabel,UFF.abscUnitsLabel);
+    fprintf(fid,'%10i%5i%5i%5i %-20.20s %-20.20s             \n',UFF.abscDataChar,0,0,0,UFF.abscAxisLabel,UFF.abscUnitsLabel);
     % line 9
-    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.ordDataChar,UFF.ordLenExp,0,0,UFF.ordinateAxisLabel,UFF.ordinateNumUnitsLabel);
+    fprintf(fid,'%10i%5i%5i%5i %-20.20s %-20.20s             \n',UFF.ordDataChar,UFF.ordLenExp,0,0,UFF.ordinateAxisLabel,UFF.ordinateNumUnitsLabel);
     %                                                      ^--acceleration data
     % line 10
     % others: 0=unknown,8=displacement,11=velocity,13=excitation force,15=pressure
-    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',UFF.ordDenomDataChar,UFF.ordDenomLenExp,0,0,'NONE',UFF.ordinateDenomUnitsLabel);
+    fprintf(fid,'%10i%5i%5i%5i %-20.20s %-20.20s             \n',UFF.ordDenomDataChar,UFF.ordDenomLenExp,0,0,'NONE',UFF.ordinateDenomUnitsLabel);
     %                                                      ^--excitation force data
     % line 11
     % others: 0=unknown,8=displacement,11=velocity,12=acceleration,15=pressure
-    fprintf(fid,'%10i%5i%5i%5i %-20s %-20s             \n',0,0,0,0,'NONE',UFF.zUnitsLabel);
+    fprintf(fid,'%10i%5i%5i%5i %-20.20s %-20.20s             \n',0,0,0,0,'NONE',UFF.zUnitsLabel);
     %
     % line 12: % data values
     nOrdValues = length(UFF.measData);
