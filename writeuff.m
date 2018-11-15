@@ -665,31 +665,12 @@ try
     else
         fprintf(fid,'%6i%74s\n',58,' ');
     end
-    if length(UFF.d1)<=80,
-        fprintf(fid,'%-80s\n',UFF.d1);   %  line 1
-    else
-        fprintf(fid,'%-80s\n',UFF.d1(1:80));   %  line 1
-    end
-    if length(UFF.d2)<=80,
-        fprintf(fid,'%-80s\n',UFF.d2);   %  line 2
-    else
-        fprintf(fid,'%-80s\n',UFF.d2(1:80));   %  line 2
-    end
-    if length(UFF.date)<=80,
-        fprintf(fid,'%-80s\n',UFF.date);   %  line 3
-    else
-        fprintf(fid,'%-80s\n',UFF.date(1:80));   %  line 3
-    end
-    if length(UFF.ID_4)<=80,
-        fprintf(fid,'%-80s\n',UFF.ID_4);   %  line 4
-    else
-        fprintf(fid,'%-80s\n',UFF.ID_4(1:80));   %  line 4
-    end
-    if length(UFF.ID_5)<=80,
-        fprintf(fid,'%-80s\n',UFF.ID_5);   %  line 5
-    else
-        fprintf(fid,'%-80s\n',UFF.ID_5(1:80));   %  line 5
-    end
+
+    fprintf(fid,'%-80.80s\n',UFF.d1);   %  line 1
+    fprintf(fid,'%-80.80s\n',UFF.d2);   %  line 2
+    fprintf(fid,'%-80.80s\n',UFF.date);   %  line 3
+    fprintf(fid,'%-80.80s\n',UFF.ID_4);   %  line 4
+    fprintf(fid,'%-80.80s\n',UFF.ID_5);   %  line 5
     %
     fprintf(fid,'%5i%10i%5i%10i %-10.10s%10i%4i %-10.10s%10i%4i\n',UFF.functionType,0,0,UFF.loadCaseId,UFF.rspEntName,...
         UFF.rspNode,UFF.rspDir,UFF.refEntName,UFF.refNode,UFF.refDir);    % line 6
